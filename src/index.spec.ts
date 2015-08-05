@@ -85,4 +85,10 @@ describe('compose middleware', () => {
       return done()
     })
   })
+
+  it('should noop with no middleware', (done) => {
+    const middleware = compose([null])
+
+    middleware({}, {}, done)
+  })
 })

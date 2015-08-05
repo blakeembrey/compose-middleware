@@ -7,10 +7,15 @@ export function compose (handlers: Middleware | Middleware[]): Middleware {
     return <Middleware> handlers
   }
 
-  const stack = flatten(<Middleware[]> handlers)
+  const stack = flatten(<Middleware[]> handlers).filter((x) => x != null)
+
+  // Noop for no middleware.
+  if (stack.length === 0) {
+    return noop
+  }
 
   // Quick exit.
-  if (handlers.length < 2) {
+  if (stack.length === 1) {
     return stack[0]
   }
 
@@ -33,4 +38,8 @@ export function compose (handlers: Middleware | Middleware[]): Middleware {
 
     next()
   }
+}
+
+export function noop (req: any, res: any, next: (err?: Error) => any): void {
+  next()
 }
