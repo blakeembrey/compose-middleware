@@ -68,4 +68,21 @@ describe('compose middleware', () => {
       return done()
     })
   })
+
+  it('should accept a single function', (done) => {
+    const middleware = compose(function (req, res, next) {
+      req.one = true
+      next()
+    })
+
+    const req: any = {}
+    const res: any = {}
+
+    middleware(req, res, function (err) {
+      expect(err).to.not.exist
+      expect(req.one).to.be.true
+
+      return done()
+    })
+  })
 })
