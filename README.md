@@ -15,7 +15,7 @@ npm install compose-middleware --save
 
 ## Usage
 
-Mostly useful for third-party tooling that needs to generate a middleware function without the overhead of an array. You should probably just use an array.
+Compose multiple middleware functions into a single request middleware handler, with support for inline error handling middleware.
 
 ```js
 var express = require('express')
