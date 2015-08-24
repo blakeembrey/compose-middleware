@@ -1,6 +1,6 @@
 {
   "name": "compose-middleware",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Compose an array of middleware into a single function for use in Express, Connect, router, etc.",
   "main": "lib/index.js",
   "files": [
