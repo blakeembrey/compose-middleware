@@ -30,17 +30,19 @@ export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
 
       const handler = stack[index++]
 
-      if (err) {
-        if (handler.length === 4) {
+      if (handler.length === 4) {
+        if (err) {
           (<ErrorMiddleware> handler)(err, req, res, next)
         } else {
           next(err)
         }
-
-        return
+      } else {
+        if (err) {
+          next(err)
+        } else {
+          (<RequestMiddleware> handler)(req, res, next)
+        }
       }
-
-      return (<RequestMiddleware> handler)(req, res, next)
     }
 
     next()

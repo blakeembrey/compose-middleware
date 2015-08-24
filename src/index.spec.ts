@@ -106,12 +106,17 @@ describe('compose middleware', () => {
       function (req: any, res: any, next: Callback) {
         req.success = true
         return next()
+      },
+      function (err: Error, req: any, res: any, next: Callback) {
+        req.fail = true
+        return next()
       }
     )
 
     const req: any = {}
 
     middleware(req, {}, function (err) {
+      expect(req.fail).to.not.exist
       expect(req.success).to.be.true
 
       return done(err)
