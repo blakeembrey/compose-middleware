@@ -18,10 +18,10 @@ npm install compose-middleware --save
 Mostly useful for third-party tooling that needs to generate a middleware function without the overhead of an array. You should probably just use an array.
 
 ```js
-import express = require('express')
-import { compose } from 'compose-middleware'
+var express = require('express')
+var compose = require('compose-middleware').compose
 
-const app = express()
+var app = express()
 
 app.use(compose([
   function (req, res, next) {},
