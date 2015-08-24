@@ -7,7 +7,13 @@ export function compose (handlers: Middleware | Middleware[]): Middleware {
     return <Middleware> handlers
   }
 
-  const stack = flatten(<Middleware[]> handlers).filter((x) => x != null)
+  const stack = flatten(<Middleware[]> handlers)
+
+  for (const handler of stack) {
+    if (typeof handler !== 'function') {
+      throw new TypeError('Handlers must be a function')
+    }
+  }
 
   // Noop for no middleware.
   if (stack.length === 0) {
