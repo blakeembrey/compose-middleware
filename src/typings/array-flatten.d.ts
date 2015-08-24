@@ -1,9 +1,9 @@
 declare module 'array-flatten' {
-  interface MultiArray <T> {
-    [index: number]: T | MultiArray<T>
+  interface NestedArray <T> {
+    [index: number]: T | NestedArray<T>
   }
 
-  function arrayFlatten <T> (array: MultiArray<T>): T[]
+  function arrayFlatten <T> (array: NestedArray<T>): T[]
 
   export = arrayFlatten
 }

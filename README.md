@@ -25,7 +25,7 @@ var app = express()
 
 app.use(compose([
   function (req, res, next) {},
-  function (req, res, next) {},
+  function (err, req, res, next) {},
   function (req, res, next) {}
 ]))
 ```

@@ -1,13 +1,18 @@
 import flatten = require('array-flatten')
 
-export type Middleware = (req?: any, res?: any, next?: (err?: Error) => any) => any
+export type Callback = (err?: Error) => any
+export type RequestMiddleware = (req?: any, res?: any, next?: Callback) => any
+export type ErrorMiddleware = (err?: Error, req?: any, res?: any, next?: Callback) => any
+export type Middleware = RequestMiddleware | ErrorMiddleware
 
-export function compose (handlers: Middleware | Middleware[]): Middleware {
-  if (typeof handlers === 'function') {
-    return <Middleware> handlers
-  }
+export interface NestedArray <T> {
+  [index: number]: T | NestedArray<T>
+}
 
-  const stack = flatten(<Middleware[]> handlers)
+export type MiddlewareHandlers = Middleware | NestedArray<Middleware>
+
+export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
+  const stack = flatten<Middleware>(handlers)
 
   for (const handler of stack) {
     if (typeof handler !== 'function') {
@@ -15,37 +20,29 @@ export function compose (handlers: Middleware | Middleware[]): Middleware {
     }
   }
 
-  // Noop for no middleware.
-  if (stack.length === 0) {
-    return noop
-  }
-
-  // Quick exit.
-  if (stack.length === 1) {
-    return stack[0]
-  }
-
-  return function middleware (req, res, done) {
+  return function middleware (req: any, res: any, done: Callback) {
     let index = 0
 
     function next (err?: Error): void {
-      if (err) {
-        return done(err)
-      }
-
       if (index === stack.length) {
-        return done()
+        return done(err)
       }
 
       const handler = stack[index++]
 
-      return handler(req, res, next)
+      if (err) {
+        if (handler.length === 4) {
+          (<ErrorMiddleware> handler)(err, req, res, next)
+        } else {
+          next(err)
+        }
+
+        return
+      }
+
+      return (<RequestMiddleware> handler)(req, res, next)
     }
 
     next()
   }
-}
-
-export function noop (req: any, res: any, next: (err?: Error) => any): void {
-  next()
 }
