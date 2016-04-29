@@ -5,11 +5,7 @@ export type RequestMiddleware = (req?: any, res?: any, next?: Callback) => any
 export type ErrorMiddleware = (err?: Error, req?: any, res?: any, next?: Callback) => any
 export type Middleware = RequestMiddleware | ErrorMiddleware
 
-export interface NestedArray <T> {
-  [index: number]: T | NestedArray<T>
-}
-
-export type MiddlewareHandlers = Middleware | NestedArray<Middleware>
+export type MiddlewareHandlers = Middleware | flatten.NestedArray<Middleware>
 
 export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
   const stack = flatten<Middleware>(handlers)

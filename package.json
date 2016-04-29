@@ -3,6 +3,7 @@
   "version": "2.0.1",
   "description": "Compose an array of middleware into a single function for use in Express, Connect, router, etc.",
   "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "files": [
     "lib/",
     "LICENSE"
@@ -14,7 +15,7 @@
     "test-spec": "mocha lib/**/*.spec.js -R spec --bail",
     "test-cov": "istanbul cover -x *.spec.js node_modules/mocha/bin/_mocha -- lib/**/*.spec.js -R spec --bail",
     "test": "npm run build && npm run lint && npm run test-cov",
-    "prepublish": "npm run build"
+    "prepublish": "typings install && npm run build"
   },
   "repository": {
     "type": "git",
@@ -41,10 +42,10 @@
     "chai": "^3.2.0",
     "istanbul": "^0.3.17",
     "mocha": "^2.2.5",
-    "pre-commit": "^1.1.1",
-    "typescript": "^1.5.3"
+    "typescript": "^1.5.3",
+    "typings": "^0.8.1"
   },
   "dependencies": {
-    "array-flatten": "^1.1.1"
+    "array-flatten": "^2.1.0"
   }
 }
