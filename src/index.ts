@@ -28,7 +28,7 @@ export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
 
       if (handler.length === 4) {
         if (err) {
-          (<ErrorMiddleware> handler)(err, req, res, next)
+          (handler as ErrorMiddleware)(err, req, res, next)
         } else {
           next(err)
         }
@@ -36,7 +36,7 @@ export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
         if (err) {
           next(err)
         } else {
-          (<RequestMiddleware> handler)(req, res, next)
+          (handler as RequestMiddleware)(req, res, next)
         }
       }
     }

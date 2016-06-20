@@ -86,13 +86,13 @@ describe('compose middleware', () => {
   })
 
   it('should noop with no middleware', (done) => {
-    const middleware = compose(<Middleware[]> [])
+    const middleware = compose([] as Middleware[])
 
     middleware({}, {}, done)
   })
 
   it('should validate all handlers are functions', () => {
-    expect(() => compose(<any> ['foo'])).to.throw(TypeError, 'Handlers must be a function')
+    expect(() => compose(['foo'] as any)).to.throw(TypeError, 'Handlers must be a function')
   })
 
   it('should support error handlers', (done) => {
