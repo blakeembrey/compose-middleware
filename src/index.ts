@@ -31,14 +31,24 @@ export function errors (...handlers: Handler[]): ErrorHandler {
   }
 
   return function middleware (err: any, req: any, res: any, done: Callback) {
-    let index = 0
+    let index = -1
 
-    function next (err?: Error): void {
+    function dispatch (pos: number, err?: Error): void {
+      if (pos <= index) {
+        throw new TypeError('`next()` called multiple times')
+      }
+
+      index = pos
+
       if (index === stack.length) {
         return done(err)
       }
 
-      const handler = stack[index++]
+      function next (err?: Error) {
+        return dispatch(pos + 1, err)
+      }
+
+      const handler = stack[index]
 
       if (handler.length === 4) {
         if (err) {
@@ -55,6 +65,6 @@ export function errors (...handlers: Handler[]): ErrorHandler {
       return (handler as RequestHandler)(req, res, next)
     }
 
-    return next(err)
+    return dispatch(0, err)
   }
 }

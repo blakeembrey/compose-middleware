@@ -122,4 +122,20 @@ describe('compose middleware', () => {
       return done(err)
     })
   })
+
+  it('should error when calling `next()` multiple times', (done) => {
+    const middleware = compose(
+      function (req: any, res: any, next: Callback) {
+        next()
+
+        try {
+          next()
+        } catch (err) {
+          return done()
+        }
+      }
+    )
+
+    middleware({}, {}, function () {/* */})
+  })
 })
