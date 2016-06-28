@@ -48,23 +48,32 @@ export function errors (...handlers: Handler[]): ErrorHandler {
         return dispatch(pos + 1, err)
       }
 
-      const handler = stack[index]
-
-      if (handler.length === 4) {
-        if (err) {
-          return (handler as ErrorHandler)(err, req, res, next)
-        }
-
-        return next(err)
-      }
-
-      if (err) {
-        return next(err)
-      }
-
-      return (handler as RequestHandler)(req, res, next)
+      return handle(stack[pos], err, req, res, next)
     }
 
     return dispatch(0, err)
+  }
+}
+
+/**
+ * Wrap middleware handling in a `try..catch` which forwards errors.
+ */
+function handle (handler: Handler, err: Error, req: any, res: any, next: Callback) {
+  try {
+    if (handler.length === 4) {
+      if (err) {
+        return (handler as ErrorHandler)(err, req, res, next)
+      }
+
+      return next(err)
+    }
+
+    if (err) {
+      return next(err)
+    }
+
+    return (handler as RequestHandler)(req, res, next)
+  } catch (err) {
+    return next(err)
   }
 }

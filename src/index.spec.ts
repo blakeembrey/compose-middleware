@@ -138,4 +138,19 @@ describe('compose middleware', () => {
 
     middleware({}, {}, function () {/* */})
   })
+
+  it('should forward thrown errors', (done) => {
+    const middleware = compose(
+      function (req: any, res: any, next: Callback) {
+        throw new Error('Boom!')
+      }
+    )
+
+    middleware({}, {}, function (err) {
+      expect(err).to.exist
+      expect(err.message).to.equal('Boom!')
+
+      return done()
+    })
+  })
 })
