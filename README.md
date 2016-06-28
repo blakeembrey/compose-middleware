@@ -30,6 +30,8 @@ app.use(compose([
 ]))
 ```
 
+**P.S.** The composed function takes three arguments. Express.js (and Connect, router) only accept error handlers of four arguments. If you want to return an error handler from `compose` instead, try the `errors` export - it works exactly the same, but exposes the four argument middleware pattern.
+
 ## License
 
 MIT
