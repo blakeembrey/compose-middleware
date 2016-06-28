@@ -1,13 +1,27 @@
 import flatten = require('array-flatten')
 
 export type Callback = (err?: Error) => any
-export type RequestMiddleware = (req?: any, res?: any, next?: Callback) => any
-export type ErrorMiddleware = (err?: Error, req?: any, res?: any, next?: Callback) => any
-export type Middleware = RequestMiddleware | ErrorMiddleware
+export type RequestHandler = (req?: any, res?: any, next?: Callback) => any
+export type ErrorHandler = (err?: Error, req?: any, res?: any, next?: Callback) => any
+export type Middleware = RequestHandler | ErrorHandler
 
-export type MiddlewareHandlers = Middleware | flatten.NestedArray<Middleware>
+export type Handler = Middleware | flatten.NestedArray<Middleware>
 
-export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
+/**
+ * Compose an array of middleware handlers into a single handler.
+ */
+export function compose (...handlers: Handler[]): RequestHandler {
+  const middleware = errors(...handlers)
+
+  return function (req: any, res: any, done: Callback) {
+    return middleware(null, req, res, done)
+  }
+}
+
+/**
+ * Wrap middleware handlers.
+ */
+export function errors (...handlers: Handler[]): ErrorHandler {
   const stack = flatten<Middleware>(handlers)
 
   for (const handler of stack) {
@@ -16,7 +30,7 @@ export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
     }
   }
 
-  return function middleware (req: any, res: any, done: Callback) {
+  return function middleware (err: any, req: any, res: any, done: Callback) {
     let index = 0
 
     function next (err?: Error): void {
@@ -28,19 +42,19 @@ export function compose (...handlers: MiddlewareHandlers[]): RequestMiddleware {
 
       if (handler.length === 4) {
         if (err) {
-          (handler as ErrorMiddleware)(err, req, res, next)
-        } else {
-          next(err)
+          return (handler as ErrorHandler)(err, req, res, next)
         }
-      } else {
-        if (err) {
-          next(err)
-        } else {
-          (handler as RequestMiddleware)(req, res, next)
-        }
+
+        return next(err)
       }
+
+      if (err) {
+        return next(err)
+      }
+
+      return (handler as RequestHandler)(req, res, next)
     }
 
-    next()
+    return next(err)
   }
 }
