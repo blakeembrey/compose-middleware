@@ -100,14 +100,14 @@ describe('compose middleware', () => {
       function (req: any, res: any, next: Callback) {
         return next(new Error('test'))
       },
-      function (err: Error, req: any, res: any, next: Callback) {
+      function (_: Error, req: any, res: any, next: Callback) {
         return next()
       },
       function (req: any, res: any, next: Callback) {
         req.success = true
         return next()
       },
-      function (err: Error, req: any, res: any, next: Callback) {
+      function (_: Error, req: any, res: any, next: Callback) {
         req.fail = true
         return next()
       }
