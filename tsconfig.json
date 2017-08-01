@@ -9,9 +9,7 @@
     "sourceMap": true,
     "inlineSources": true
   },
-  "files": [
-    "src/index.ts",
-    "src/index.spec.ts",
-    "typings/index.d.ts"
+  "include": [
+    "src/**/*"
   ]
 }

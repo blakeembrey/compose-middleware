@@ -18,9 +18,9 @@ describe('compose middleware', () => {
     const res: any = {}
 
     middleware(req, res, function (err) {
-      expect(err).to.not.exist
-      expect(req.one).to.be.true
-      expect(req.two).to.be.true
+      expect(err).to.equal(undefined)
+      expect(req.one).to.equal(true)
+      expect(req.two).to.equal(true)
 
       return done()
     })
@@ -42,9 +42,9 @@ describe('compose middleware', () => {
     const res: any = {}
 
     middleware(req, res, function (err) {
-      expect(err).to.exist
-      expect(req.one).to.be.true
-      expect(req.two).to.not.exist
+      expect(err).instanceOf(Error)
+      expect(req.one).to.equal(true)
+      expect(req.two).to.equal(undefined)
 
       return done()
     })
@@ -62,8 +62,8 @@ describe('compose middleware', () => {
     const res: any = {}
 
     middleware(req, res, function (err) {
-      expect(err).to.not.exist
-      expect(req.one).to.be.true
+      expect(err).to.equal(undefined)
+      expect(req.one).to.equal(true)
 
       return done()
     })
@@ -78,8 +78,8 @@ describe('compose middleware', () => {
     const req: any = {}
 
     middleware(req, {}, function (err: Error) {
-      expect(err).to.not.exist
-      expect(req.one).to.be.true
+      expect(err).to.equal(undefined)
+      expect(req.one).to.equal(true)
 
       return done()
     })
@@ -116,8 +116,8 @@ describe('compose middleware', () => {
     const req: any = {}
 
     middleware(req, {}, function (err) {
-      expect(req.fail).to.not.exist
-      expect(req.success).to.be.true
+      expect(req.fail).to.equal(undefined)
+      expect(req.success).to.equal(true)
 
       return done(err)
     })
@@ -149,7 +149,7 @@ describe('compose middleware', () => {
     )
 
     middleware({}, {}, function (err) {
-      expect(err).to.exist
+      expect(err).instanceOf(Error)
       expect(err.message).to.equal('Boom!')
 
       return done()
