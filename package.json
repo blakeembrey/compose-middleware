@@ -49,6 +49,8 @@
     "typescript": "^2.4.2"
   },
   "dependencies": {
-    "array-flatten": "^2.1.0"
+    "@types/debug": "0.0.29",
+    "array-flatten": "^2.1.0",
+    "debug": "^2.6.8"
   }
 }
