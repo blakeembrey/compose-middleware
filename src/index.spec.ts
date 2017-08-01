@@ -131,6 +131,8 @@ describe('compose middleware', () => {
         try {
           next()
         } catch (err) {
+          expect(err.message).to.equal('`next()` called multiple times')
+
           return done()
         }
       }

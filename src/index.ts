@@ -58,7 +58,7 @@ export function errors (...handlers: Handler[]): ErrorHandler {
 /**
  * Wrap middleware handling in a `try..catch` which forwards errors.
  */
-function handle (handler: Handler, err: Error, req: any, res: any, next: Callback) {
+function handle (handler: Middleware, err: Error, req: any, res: any, next: Callback) {
   try {
     if (handler.length === 4) {
       if (err) {
