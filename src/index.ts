@@ -1,4 +1,7 @@
+import debug = require('debug')
 import flatten = require('array-flatten')
+
+const log = debug('compose-middleware')
 
 export type Callback = (err?: Error) => any
 export type RequestHandler = (req?: any, res?: any, next?: Callback) => any
@@ -34,21 +37,19 @@ export function errors (...handlers: Handler[]): ErrorHandler {
     let index = -1
 
     function dispatch (pos: number, err?: Error): void {
-      if (pos <= index) {
-        throw new TypeError('`next()` called multiple times')
-      }
-
       index = pos
 
       if (index === stack.length) {
         return done(err)
       }
 
-      function next (err?: Error) {
-        return dispatch(pos + 1, err)
-      }
+      return handle(stack[pos], err, req, res, function next (err?: Error) {
+        if (pos < index) {
+          throw new TypeError('`next()` called multiple times')
+        }
 
-      return handle(stack[pos], err, req, res, next)
+        return dispatch(pos + 1, err)
+      })
     }
 
     return dispatch(0, err)
@@ -59,6 +60,8 @@ export function errors (...handlers: Handler[]): ErrorHandler {
  * Wrap middleware handling in a `try..catch` which forwards errors.
  */
 function handle (handler: Middleware, err: Error, req: any, res: any, next: Callback) {
+  log('handle', (handler as any).name || '<anonymous>')
+
   try {
     if (handler.length === 4) {
       if (err) {
@@ -74,6 +77,8 @@ function handle (handler: Middleware, err: Error, req: any, res: any, next: Call
 
     return (handler as RequestHandler)(req, res, next)
   } catch (err) {
+    log('try..catch', err)
+
     return next(err)
   }
 }
