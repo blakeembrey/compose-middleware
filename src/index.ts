@@ -3,20 +3,20 @@ import flatten = require('array-flatten')
 
 const log = debug('compose-middleware')
 
-export type Callback = (err?: Error) => any
-export type RequestHandler = (req?: any, res?: any, next?: Callback) => any
-export type ErrorHandler = (err?: Error, req?: any, res?: any, next?: Callback) => any
-export type Middleware = RequestHandler | ErrorHandler
+export type Next<T = void> = (err?: Error) => T
+export type RequestHandler <T = any, U = any, V = void> = (req?: T, res?: U, next?: Next<V>) => V
+export type ErrorHandler <T = any, U = any, V = void> = (err?: Error, req?: T, res?: U, next?: Next<V>) => V
+export type Middleware <T = any, U = any, V = void> = RequestHandler<T, U, V> | ErrorHandler<T, U, V>
 
-export type Handler = Middleware | flatten.NestedArray<Middleware>
+export type Handler <T = any, U = any, V = void> = Middleware<T, U, V> | flatten.NestedArray<Middleware<T, U, V>>
 
 /**
  * Compose an array of middleware handlers into a single handler.
  */
-export function compose (...handlers: Handler[]): RequestHandler {
+export function compose <T, U, V = void> (...handlers: Handler<T, U, V>[]): RequestHandler<T, U, V> {
   const middleware = errors(...handlers)
 
-  return function (req: any, res: any, done: Callback) {
+  return function (req: any, res: any, done: Next<V>) {
     return middleware(null, req, res, done)
   }
 }
@@ -24,8 +24,8 @@ export function compose (...handlers: Handler[]): RequestHandler {
 /**
  * Wrap middleware handlers.
  */
-export function errors (...handlers: Handler[]): ErrorHandler {
-  const stack = flatten<Middleware>(handlers)
+export function errors <T, U, V = void> (...handlers: Handler<T, U, V>[]): ErrorHandler<T, U, V> {
+  const stack = flatten<Middleware<T, U, V>>(handlers)
 
   for (const handler of stack) {
     if (typeof handler !== 'function') {
@@ -33,10 +33,10 @@ export function errors (...handlers: Handler[]): ErrorHandler {
     }
   }
 
-  return function middleware (err: any, req: any, res: any, done: Callback) {
+  return function middleware (err: any, req: T, res: U, done: Next<V>): V {
     let index = -1
 
-    function dispatch (pos: number, err?: Error): void {
+    function dispatch (pos: number, err?: Error): V {
       index = pos
 
       if (index === stack.length) {
@@ -58,13 +58,13 @@ export function errors (...handlers: Handler[]): ErrorHandler {
           if (err) {
             log('handle(err)', (handler as any).name || '<anonymous>')
 
-            return (handler as ErrorHandler)(err, req, res, next)
+            return (handler as ErrorHandler<T, U, V>)(err, req, res, next)
           }
         } else {
           if (!err) {
             log('handle()', (handler as any).name || '<anonymous>')
 
-            return (handler as RequestHandler)(req, res, next)
+            return (handler as RequestHandler<T, U, V>)(req, res, next)
           }
         }
       } catch (e) {

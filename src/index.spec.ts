@@ -1,14 +1,14 @@
-import { compose, Middleware, Callback } from './index'
+import { compose, Middleware, Next } from './index'
 import { expect } from 'chai'
 
 describe('compose middleware', () => {
   it('should compose middleware', (done) => {
     const middleware = compose([
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         req.one = true
         next()
       },
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         req.two = true
         next()
       }
@@ -28,11 +28,11 @@ describe('compose middleware', () => {
 
   it('should exit with an error', (done) => {
     const middleware = compose([
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         req.one = true
         next(new Error('test'))
       },
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         req.two = true
         next()
       }
@@ -52,7 +52,7 @@ describe('compose middleware', () => {
 
   it('should short-cut handler with a single function', (done) => {
     const middleware = compose([
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         req.one = true
         next()
       }
@@ -70,7 +70,7 @@ describe('compose middleware', () => {
   })
 
   it('should accept a single function', (done) => {
-    const middleware = compose(function (req: any, res: any, next: Callback) {
+    const middleware = compose(function (req: any, res: any, next: Next) {
       req.one = true
       next()
     })
@@ -97,17 +97,17 @@ describe('compose middleware', () => {
 
   it('should support error handlers', (done) => {
     const middleware = compose(
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         return next(new Error('test'))
       },
-      function (_: Error, req: any, res: any, next: Callback) {
+      function (_: Error, req: any, res: any, next: Next) {
         return next()
       },
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         req.success = true
         return next()
       },
-      function (_: Error, req: any, res: any, next: Callback) {
+      function (_: Error, req: any, res: any, next: Next) {
         req.fail = true
         return next()
       }
@@ -125,7 +125,7 @@ describe('compose middleware', () => {
 
   it('should error when calling `next()` multiple times', (done) => {
     const middleware = compose(
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         next()
         next()
       }
@@ -142,7 +142,7 @@ describe('compose middleware', () => {
 
   it('should forward thrown errors', (done) => {
     const middleware = compose(
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         throw new Error('Boom!')
       }
     )
@@ -156,42 +156,42 @@ describe('compose middleware', () => {
   })
 
   it('should not cascade errors from `done()`', (done) => {
-    const middleware = compose(
-      function (req: any, res: any, next: Callback) {
-        req.first++
-
-        return next()
-      },
-      function (req: any, res: any, next: Callback) {
-        req.second++
-
-        throw new TypeError('Boom!')
-      },
-      function (req: any, res: any, next: Callback) {
-        req.third++
-
-        return next()
-      }
-    )
-
-    const req = {
+    const request = {
       done: 0,
       first: 0,
       second: 0,
       third: 0
     }
 
+    const middleware = compose(
+      function (req: typeof request, res: any, next: Next) {
+        req.first++
+
+        return next()
+      },
+      function (req: typeof request, res: any, next: Next) {
+        req.second++
+
+        throw new TypeError('Boom!')
+      },
+      function (req: typeof request, res: any, next: Next) {
+        req.third++
+
+        return next()
+      }
+    )
+
     try {
-      middleware(req, {}, function () {
-        req.done++
+      middleware(request, {}, function () {
+        request.done++
 
         throw new TypeError('This is the end')
       })
     } catch (err) {
-      expect(req.done).to.equal(1)
-      expect(req.first).to.equal(1)
-      expect(req.second).to.equal(1)
-      expect(req.third).to.equal(0)
+      expect(request.done).to.equal(1)
+      expect(request.first).to.equal(1)
+      expect(request.second).to.equal(1)
+      expect(request.third).to.equal(0)
 
       expect(err).instanceOf(TypeError)
       expect(err.message).to.equal('This is the end')
@@ -204,14 +204,14 @@ describe('compose middleware', () => {
 
   it('should avoid handling post-next thrown errors', function (done) {
     const middleware = compose(
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         return next()
       },
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         next()
         throw new TypeError('Boom!')
       },
-      function (req: any, res: any, next: Callback) {
+      function (req: any, res: any, next: Next) {
         return setImmediate(next)
       }
     )
