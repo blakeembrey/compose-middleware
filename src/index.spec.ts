@@ -127,18 +127,17 @@ describe('compose middleware', () => {
     const middleware = compose(
       function (req: any, res: any, next: Callback) {
         next()
-
-        try {
-          next()
-        } catch (err) {
-          expect(err.message).to.equal('`next()` called multiple times')
-
-          return done()
-        }
+        next()
       }
     )
 
-    middleware({}, {}, function () {/* */})
+    try {
+      middleware({}, {}, function () {/* */})
+    } catch (err) {
+      expect(err.message).to.equal('`next()` called multiple times')
+
+      return done()
+    }
   })
 
   it('should forward thrown errors', (done) => {
@@ -154,5 +153,79 @@ describe('compose middleware', () => {
 
       return done()
     })
+  })
+
+  it('should not cascade errors from `done()`', (done) => {
+    const middleware = compose(
+      function (req: any, res: any, next: Callback) {
+        req.first++
+
+        return next()
+      },
+      function (req: any, res: any, next: Callback) {
+        req.second++
+
+        throw new TypeError('Boom!')
+      },
+      function (req: any, res: any, next: Callback) {
+        req.third++
+
+        return next()
+      }
+    )
+
+    const req = {
+      done: 0,
+      first: 0,
+      second: 0,
+      third: 0
+    }
+
+    try {
+      middleware(req, {}, function () {
+        req.done++
+
+        throw new TypeError('This is the end')
+      })
+    } catch (err) {
+      expect(req.done).to.equal(1)
+      expect(req.first).to.equal(1)
+      expect(req.second).to.equal(1)
+      expect(req.third).to.equal(0)
+
+      expect(err).instanceOf(TypeError)
+      expect(err.message).to.equal('This is the end')
+
+      return done()
+    }
+
+    return done(new TypeError('Missed thrown error'))
+  })
+
+  it('should avoid handling post-next thrown errors', function (done) {
+    const middleware = compose(
+      function (req: any, res: any, next: Callback) {
+        return next()
+      },
+      function (req: any, res: any, next: Callback) {
+        next()
+        throw new TypeError('Boom!')
+      },
+      function (req: any, res: any, next: Callback) {
+        return setImmediate(next)
+      }
+    )
+
+    try {
+      middleware({}, {}, function (err) {
+        return done(err)
+      })
+    } catch (err) {
+      expect(err).instanceOf(TypeError)
+      expect(err.message).to.equal('Boom!')
+      return
+    }
+
+    return done(new TypeError('Missed thrown error'))
   })
 })

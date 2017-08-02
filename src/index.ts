@@ -43,42 +43,42 @@ export function errors (...handlers: Handler[]): ErrorHandler {
         return done(err)
       }
 
-      return handle(stack[pos], err, req, res, function next (err?: Error) {
+      const handler = stack[pos]
+
+      function next (err?: Error) {
         if (pos < index) {
           throw new TypeError('`next()` called multiple times')
         }
 
         return dispatch(pos + 1, err)
-      })
-    }
+      }
 
-    return dispatch(0, err)
-  }
-}
+      try {
+        if (handler.length === 4) {
+          if (err) {
+            log('handle(err)', (handler as any).name || '<anonymous>')
 
-/**
- * Wrap middleware handling in a `try..catch` which forwards errors.
- */
-function handle (handler: Middleware, err: Error, req: any, res: any, next: Callback) {
-  log('handle', (handler as any).name || '<anonymous>')
+            return (handler as ErrorHandler)(err, req, res, next)
+          }
+        } else {
+          if (!err) {
+            log('handle()', (handler as any).name || '<anonymous>')
 
-  try {
-    if (handler.length === 4) {
-      if (err) {
-        return (handler as ErrorHandler)(err, req, res, next)
+            return (handler as RequestHandler)(req, res, next)
+          }
+        }
+      } catch (e) {
+        // Avoid future errors that could diverge stack execution.
+        if (index > pos) throw e
+
+        log('try..catch', e)
+
+        return next(e)
       }
 
       return next(err)
     }
 
-    if (err) {
-      return next(err)
-    }
-
-    return (handler as RequestHandler)(req, res, next)
-  } catch (err) {
-    log('try..catch', err)
-
-    return next(err)
+    return dispatch(0, err)
   }
 }
