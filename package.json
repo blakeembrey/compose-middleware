@@ -40,6 +40,7 @@
   "homepage": "https://github.com/blakeembrey/compose-middleware",
   "devDependencies": {
     "@types/chai": "^4.0.2",
+    "@types/debug": "0.0.29",
     "@types/mocha": "^2.2.41",
     "chai": "^4.1.0",
     "istanbul": "^0.4.4",
@@ -49,7 +50,6 @@
     "typescript": "^2.4.2"
   },
   "dependencies": {
-    "@types/debug": "0.0.29",
     "array-flatten": "^2.1.0",
     "debug": "^2.6.8"
   }
