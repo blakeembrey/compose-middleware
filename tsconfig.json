@@ -1,15 +1,12 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "rootDir": "src",
     "outDir": "lib",
     "module": "commonjs",
+    "strict": true,
     "declaration": true,
-    "noImplicitAny": true,
-    "removeComments": true,
     "sourceMap": true,
     "inlineSources": true
-  },
-  "include": [
-    "src/**/*"
-  ]
+  }
 }

@@ -1,4 +1,4 @@
-import { compose, Middleware, Next } from './index'
+import { compose, Next, PossibleError } from './index'
 import { expect } from 'chai'
 
 describe('compose middleware', () => {
@@ -70,14 +70,14 @@ describe('compose middleware', () => {
   })
 
   it('should accept a single function', (done) => {
-    const middleware = compose(function (req: any, res: any, next: Next) {
+    const middleware = compose<any, any>(function (req: any, res: any, next: Next) {
       req.one = true
       next()
     })
 
     const req: any = {}
 
-    middleware(req, {}, function (err: Error) {
+    middleware(req, {}, function (err: PossibleError) {
       expect(err).to.equal(undefined)
       expect(req.one).to.equal(true)
 
@@ -86,7 +86,7 @@ describe('compose middleware', () => {
   })
 
   it('should noop with no middleware', (done) => {
-    const middleware = compose([] as Middleware[])
+    const middleware = compose([])
 
     middleware({}, {}, done)
   })
@@ -124,7 +124,7 @@ describe('compose middleware', () => {
   })
 
   it('should error when calling `next()` multiple times', (done) => {
-    const middleware = compose(
+    const middleware = compose<any, any>(
       function (req: any, res: any, next: Next) {
         next()
         next()
@@ -141,7 +141,7 @@ describe('compose middleware', () => {
   })
 
   it('should forward thrown errors', (done) => {
-    const middleware = compose(
+    const middleware = compose<any, any>(
       function (req: any, res: any, next: Next) {
         throw new Error('Boom!')
       }
@@ -149,7 +149,7 @@ describe('compose middleware', () => {
 
     middleware({}, {}, function (err) {
       expect(err).instanceOf(Error)
-      expect(err.message).to.equal('Boom!')
+      expect(err!.message).to.equal('Boom!')
 
       return done()
     })
@@ -163,7 +163,7 @@ describe('compose middleware', () => {
       third: 0
     }
 
-    const middleware = compose(
+    const middleware = compose<typeof request, any>(
       function (req: typeof request, res: any, next: Next) {
         req.first++
 
@@ -203,7 +203,7 @@ describe('compose middleware', () => {
   })
 
   it('should avoid handling post-next thrown errors', function (done) {
-    const middleware = compose(
+    const middleware = compose<any, any>(
       function (req: any, res: any, next: Next) {
         return next()
       },
@@ -227,5 +227,20 @@ describe('compose middleware', () => {
     }
 
     return done(new TypeError('Missed thrown error'))
+  })
+
+  it('should compose functions without all arguments', function (done) {
+    const middleware = compose<any, any>(
+      function (req: any, res: any, next: Next) {
+        return next()
+      },
+      function () {
+        return done()
+      }
+    )
+
+    middleware({}, {}, function (err) {
+      return done(err || new Error('Middleware should not have finished'))
+    })
   })
 })

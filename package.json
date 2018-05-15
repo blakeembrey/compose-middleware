@@ -9,7 +9,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "lint": "tslint \"src/**/*.ts\"",
+    "lint": "tslint \"src/**/*.ts\" --project tsconfig.json",
     "build-ts": "tsc",
     "build": "rm -rf lib && npm run build-ts",
     "test-spec": "mocha lib/**/*.spec.js -R spec --bail",
@@ -40,16 +40,16 @@
   "homepage": "https://github.com/blakeembrey/compose-middleware",
   "devDependencies": {
     "@types/chai": "^4.0.2",
-    "@types/mocha": "^2.2.41",
+    "@types/mocha": "^5.2.0",
     "chai": "^4.1.0",
     "istanbul": "^0.4.4",
-    "mocha": "^3.0.0",
-    "tslint": "^5.5.0",
-    "tslint-config-standard": "^6.0.1",
-    "typescript": "^2.4.2"
+    "mocha": "^5.1.1",
+    "tslint": "^5.10.0",
+    "tslint-config-standard": "^7.0.0",
+    "typescript": "^2.8.3"
   },
   "dependencies": {
-    "@types/debug": "0.0.29",
+    "@types/debug": "0.0.30",
     "array-flatten": "^2.1.0",
     "debug": "^3.1.0"
   }
