@@ -34,7 +34,7 @@ function generate <T, U, V = void> (handlers: Array<Handler<T, U, V>>) {
   const stack = flatten<Middleware<T, U, V>>(handlers)
 
   for (const handler of stack) {
-    if (typeof handler !== 'function') {
+    if (typeof handler as any !== 'function') {
       throw new TypeError('Handlers must be a function')
     }
   }

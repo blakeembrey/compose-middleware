@@ -115,7 +115,7 @@ describe('compose middleware', () => {
 
     const req: any = {}
 
-    middleware(req, {}, function (err) {
+    middleware(req, {} as any, function (err) {
       expect(req.fail).to.equal(undefined)
       expect(req.success).to.equal(true)
 
@@ -212,7 +212,7 @@ describe('compose middleware', () => {
         throw new TypeError('Boom!')
       },
       function (req: any, res: any, next: Next) {
-        return setImmediate(next)
+        return setTimeout(next)
       }
     )
 

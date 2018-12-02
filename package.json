@@ -45,12 +45,12 @@
     "istanbul": "^0.4.4",
     "mocha": "^5.1.1",
     "tslint": "^5.10.0",
-    "tslint-config-standard": "^7.0.0",
-    "typescript": "^2.8.3"
+    "tslint-config-standard": "^8.0.1",
+    "typescript": "^3.2.1"
   },
   "dependencies": {
-    "@types/debug": "0.0.30",
+    "@types/debug": "0.0.31",
     "array-flatten": "^2.1.0",
-    "debug": "^3.1.0"
+    "debug": "^4.1.0"
   }
 }
