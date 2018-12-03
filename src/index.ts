@@ -3,8 +3,7 @@ import flatten = require('array-flatten')
 
 const log = debug('compose-middleware')
 
-export type PossibleError = null | undefined | Error
-export type Next<T = void> = (err?: PossibleError) => T
+export type Next<T = void> = (err?: Error | null) => T
 export type RequestHandler <T, U, V = void> = (req: T, res: U, next: Next<V>) => V
 export type ErrorHandler <T, U, V = void> = (err: Error, req: T, res: U, next: Next<V>) => V
 export type Middleware <T, U, V = void> = RequestHandler<T, U, V> | ErrorHandler<T, U, V>
@@ -39,17 +38,17 @@ function generate <T, U, V = void> (handlers: Array<Handler<T, U, V>>) {
     }
   }
 
-  return function middleware (err: PossibleError, req: T, res: U, done: Next<V>): V {
+  return function middleware (err: Error | null, req: T, res: U, done: Next<V>): V {
     let index = -1
 
-    function dispatch (pos: number, err: PossibleError): V {
+    function dispatch (pos: number, err?: Error | null): V {
       const handler = stack[pos]
 
       index = pos
 
       if (index === stack.length) return done(err)
 
-      function next (err?: PossibleError) {
+      function next (err?: Error | null) {
         if (pos < index) {
           throw new TypeError('`next()` called multiple times')
         }

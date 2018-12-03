@@ -1,4 +1,4 @@
-import { compose, Next, PossibleError } from './index'
+import { compose, Next, Middleware } from './index'
 import { expect } from 'chai'
 
 describe('compose middleware', () => {
@@ -84,7 +84,7 @@ describe('compose middleware', () => {
 
     const req: any = {}
 
-    middleware(req, {}, function (err: PossibleError) {
+    middleware(req, {}, function (err?: Error | null) {
       expect(err).to.equal(undefined)
       expect(req.one).to.equal(true)
 
