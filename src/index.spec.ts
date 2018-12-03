@@ -2,6 +2,13 @@ import { compose, Next, PossibleError } from './index'
 import { expect } from 'chai'
 
 describe('compose middleware', () => {
+  it('should be assignable to array of middleware', (done) => {
+    const pipeline = <T, U> (...middlewares: Array<Middleware<T, U>>) => compose(middlewares)
+    const middleware = pipeline((req: undefined, res: undefined, next: () => void) => next())
+
+    return middleware(undefined, undefined, done)
+  })
+
   it('should compose middleware', (done) => {
     const middleware = compose([
       function (req: any, res: any, next: Next) {
