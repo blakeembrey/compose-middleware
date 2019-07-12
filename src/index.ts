@@ -1,5 +1,4 @@
 import debug = require('debug')
-import flatten = require('array-flatten')
 
 const log = debug('compose-middleware')
 
@@ -8,32 +7,28 @@ export type RequestHandler <T, U, V = void> = (req: T, res: U, next: Next<V>) =>
 export type ErrorHandler <T, U, V = void> = (err: Error, req: T, res: U, next: Next<V>) => V
 export type Middleware <T, U, V = void> = RequestHandler<T, U, V> | ErrorHandler<T, U, V>
 
-export type Handler <T, U, V = void> = Middleware<T, U, V> | flatten.NestedArray<Middleware<T, U, V>>
-
 /**
- * Compose an array of middleware handlers into a single handler.
+ * Compose a variadic number of middlewares into a single success middleware.
  */
-export function compose <T, U, V = void> (...handlers: Handler<T, U, V>[]): RequestHandler<T, U, V> {
-  const middleware = generate(handlers)
+export function compose <T, U, V = void> (...middlewares: Middleware<T, U, V>[]): RequestHandler<T, U, V> {
+  const middleware = generate(middlewares)
 
   return (req: T, res: U, done: Next<V>) => middleware(null, req, res, done)
 }
 
 /**
- * Wrap middleware handlers.
+ * Compose a variadic number of middlewares into a single error middleware.
  */
-export function errors <T, U, V = void> (...handlers: Handler<T, U, V>[]): ErrorHandler<T, U, V> {
-  return generate(handlers)
+export function errors <T, U, V = void> (...middlewares: Middleware<T, U, V>[]): ErrorHandler<T, U, V> {
+  return generate(middlewares)
 }
 
 /**
  * Generate a composed middleware function.
  */
-function generate <T, U, V = void> (handlers: Array<Handler<T, U, V>>) {
-  const stack = flatten<Middleware<T, U, V>>(handlers)
-
-  for (const handler of stack) {
-    if (typeof handler as any !== 'function') {
+function generate <T, U, V = void> (middlewares: Array<Middleware<T, U, V>>) {
+  for (const middleware of middlewares) {
+    if (typeof middleware as any !== 'function') {
       throw new TypeError('Handlers must be a function')
     }
   }
@@ -42,11 +37,11 @@ function generate <T, U, V = void> (handlers: Array<Handler<T, U, V>>) {
     let index = -1
 
     function dispatch (pos: number, err?: Error | null): V {
-      const handler = stack[pos]
+      const middleware = middlewares[pos]
 
       index = pos
 
-      if (index === stack.length) return done(err)
+      if (index === middlewares.length) return done(err)
 
       function next (err?: Error | null) {
         if (pos < index) {
@@ -57,21 +52,21 @@ function generate <T, U, V = void> (handlers: Array<Handler<T, U, V>>) {
       }
 
       try {
-        if (handler.length === 4) {
+        if (middleware.length === 4) {
           if (err) {
-            log('handle(err)', (handler as any).name || '<anonymous>')
+            log('handle(err)', (middleware as any).name || '<anonymous>')
 
-            return (handler as ErrorHandler<T, U, V>)(err, req, res, next)
+            return (middleware as ErrorHandler<T, U, V>)(err, req, res, next)
           }
         } else {
           if (!err) {
-            log('handle()', (handler as any).name || '<anonymous>')
+            log('handle()', (middleware as any).name || '<anonymous>')
 
-            return (handler as RequestHandler<T, U, V>)(req, res, next)
+            return (middleware as RequestHandler<T, U, V>)(req, res, next)
           }
         }
       } catch (e) {
-        // Avoid future errors that could diverge stack execution.
+        // Avoid future errors that could diverge middlewares execution.
         if (index > pos) throw e
 
         log('try..catch', e)
