@@ -4,13 +4,36 @@ const log = debug('compose-middleware')
 
 export type Next<T = void> = (err?: Error | null) => T
 export type RequestHandler <T, U, V = void> = (req: T, res: U, next: Next<V>) => V
-export type ErrorHandler <T, U, V = void> = (err: Error, req: T, res: U, next: Next<V>) => V
+export type ErrorHandler <T, U, V = void> = (err: Error | null, req: T, res: U, next: Next<V>) => V
 export type Middleware <T, U, V = void> = RequestHandler<T, U, V> | ErrorHandler<T, U, V>
+
+/**
+ * Compose a variadic number of middlewares into a single middleware.
+ */
+export function compose <T, U, V = void> (
+  middleware?: RequestHandler<T, U, V>,
+  ...middlewares: Middleware<T, U, V>[]
+): RequestHandler<T, U, V>
+export function compose <T, U, V = void> (
+  middleware: ErrorHandler<T, U, V>,
+  ...middlewares: Middleware<T, U, V>[]
+): ErrorHandler<T, U, V>
+export function compose <T, U, V = void> (
+  middleware?: Middleware<T, U, V>,
+  ...middlewares: Middleware<T, U, V>[]
+): Middleware <T, U, V> {
+  if (!middleware) {
+    return successes<T, U, V>()
+  } else if (middleware.length === 3) {
+    return successes<T, U, V>(middleware as RequestHandler<T, U, V>, ...middlewares)
+  }
+  return errors<T, U, V>(middleware as ErrorHandler<T, U, V>, ...middlewares)
+}
 
 /**
  * Compose a variadic number of middlewares into a single success middleware.
  */
-export function compose <T, U, V = void> (...middlewares: Middleware<T, U, V>[]): RequestHandler<T, U, V> {
+export function successes <T, U, V = void> (...middlewares: Middleware<T, U, V>[]): RequestHandler<T, U, V> {
   const middleware = generate(middlewares)
 
   return (req: T, res: U, done: Next<V>) => middleware(null, req, res, done)
