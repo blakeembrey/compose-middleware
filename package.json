@@ -50,7 +50,6 @@
   },
   "dependencies": {
     "@types/debug": "0.0.31",
-    "array-flatten": "^2.1.2",
     "debug": "^4.1.0"
   }
 }
