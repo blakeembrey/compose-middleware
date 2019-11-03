@@ -18,16 +18,18 @@ npm install compose-middleware --save
 Compose multiple middleware functions into a single request middleware handler, with support for inline error handling middleware.
 
 ```js
-var express = require('express')
-var compose = require('compose-middleware').compose
+var express = require("express");
+var compose = require("compose-middleware").compose;
 
-var app = express()
+var app = express();
 
-app.use(compose([
-  function (req, res, next) {},
-  function (err, req, res, next) {},
-  function (req, res, next) {}
-]))
+app.use(
+  compose([
+    function(req, res, next) {},
+    function(err, req, res, next) {},
+    function(req, res, next) {}
+  ])
+);
 ```
 
 **P.S.** The composed function takes three arguments. Express.js (and Connect, router) only accept error handlers of four arguments. If you want to return an error handler from `compose` instead, try the `errors` export - it works exactly the same, but exposes the four argument middleware pattern.

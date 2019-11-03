@@ -9,13 +9,13 @@
     "LICENSE"
   ],
   "scripts": {
-    "lint": "tslint \"src/**/*.ts\" --project tsconfig.json",
-    "build-ts": "tsc",
-    "build": "rm -rf lib && npm run build-ts",
-    "test-spec": "mocha lib/**/*.spec.js -R spec --bail",
-    "test-cov": "istanbul cover -x *.spec.js node_modules/mocha/bin/_mocha -- lib/**/*.spec.js -R spec --bail",
-    "test": "npm run build && npm run lint && npm run test-cov",
-    "prepublish": "npm run build"
+    "prettier": "prettier --write",
+    "lint": "tslint \"src/**/*\" --project tsconfig.json",
+    "format": "npm run prettier -- \"*.{json,md,yml}\" \"src/**/*.{js,jsx,ts,tsx}\"",
+    "build": "rimraf dist/ && tsc",
+    "specs": "jest --coverage",
+    "test": "npm run build && npm run lint && npm run specs",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -38,18 +38,53 @@
     "url": "https://github.com/blakeembrey/compose-middleware/issues"
   },
   "homepage": "https://github.com/blakeembrey/compose-middleware",
+  "jest": {
+    "roots": [
+      "<rootDir>/src/"
+    ],
+    "transform": {
+      "\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,md,yml,yaml,gql,graphql}": [
+      "npm run prettier",
+      "git add"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
-    "@types/chai": "^4.0.2",
-    "@types/mocha": "^5.2.0",
-    "chai": "^4.1.0",
-    "istanbul": "^0.4.4",
-    "mocha": "^5.1.1",
-    "tslint": "^5.10.0",
+    "@types/jest": "^24.0.21",
+    "@types/node": "^12.12.5",
+    "husky": "^3.0.9",
+    "jest": "^24.9.0",
+    "lint-staged": "^9.4.2",
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.1.0",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^8.0.1",
-    "typescript": "^3.2.1"
+    "typescript": "^3.6.4"
   },
   "dependencies": {
-    "@types/debug": "0.0.31",
+    "@types/debug": "^4.1.5",
     "array-flatten": "^2.1.2",
     "debug": "^4.1.0"
   }
