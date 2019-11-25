@@ -85,7 +85,7 @@
   },
   "dependencies": {
     "@types/debug": "^4.1.5",
-    "array-flatten": "^2.1.2",
+    "array-flatten": "^3.0.0",
     "debug": "^4.1.0"
   }
 }

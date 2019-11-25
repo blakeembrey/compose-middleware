@@ -1,5 +1,5 @@
 import debug = require("debug");
-import flatten = require("array-flatten");
+import { flatten } from "array-flatten";
 
 const log = debug("compose-middleware");
 
@@ -21,7 +21,10 @@ export type Middleware<T, U, V = void> =
 
 export type Handler<T, U, V = void> =
   | Middleware<T, U, V>
-  | flatten.NestedArray<Middleware<T, U, V>>;
+  | NestedMiddleware<T, U, V>;
+
+export interface NestedMiddleware<T, U, V = void>
+  extends ReadonlyArray<Handler<T, U, V>> {}
 
 /**
  * Compose an array of middleware handlers into a single handler.
@@ -31,7 +34,9 @@ export function compose<T, U, V = void>(
 ): RequestHandler<T, U, V> {
   const middleware = generate(handlers);
 
-  return (req: T, res: U, done: Next<V>) => middleware(null, req, res, done);
+  return function requestMiddleware(req: T, res: U, done: Next<V>) {
+    return middleware(null, req, res, done);
+  };
 }
 
 /**
@@ -47,7 +52,7 @@ export function errors<T, U, V = void>(
  * Generate a composed middleware function.
  */
 function generate<T, U, V = void>(handlers: Array<Handler<T, U, V>>) {
-  const stack = flatten<Middleware<T, U, V>>(handlers);
+  const stack = flatten<typeof handlers>(handlers) as Middleware<T, U, V>[];
 
   for (const handler of stack) {
     if ((typeof handler as any) !== "function") {
