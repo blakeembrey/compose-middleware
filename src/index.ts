@@ -3,7 +3,7 @@ import { flatten } from "array-flatten";
 
 const log = debug("compose-middleware");
 
-export type Next<T = void> = (err?: Error | null) => T;
+export type Next<T = void> = (err?: any) => T;
 export type RequestHandler<T, U, V = void> = (
   req: T,
   res: U,
