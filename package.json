@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/blakeembrey/compose-middleware.git"
+    "url": "git+https://github.com/blakeembrey/compose-middleware.git"
   },
   "keywords": [
     "middleware",
